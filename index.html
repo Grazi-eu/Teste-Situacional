@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Teste DISC — 30 perguntas</title>
+  <style>
+    :root{--bg:#f6f8fb;--card:#fff;--accent:#2b6cb0;--muted:#6b7280}
+    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);margin:0;padding:24px;color:#111}
+    .container{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:20px}
+    p.lead{color:var(--muted);margin:6px 0 18px}
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(16,24,40,0.06);margin-bottom:16px}
+    .q{margin-bottom:12px}
+    .q p{margin:0 0 6px;font-weight:600}
+    .options{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    label.opt{display:block;padding:10px;border-radius:8px;border:1px solid #e6e9ef;cursor:pointer}
+    input[type=radio]{margin-right:8px}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+    button.secondary{background:#e6eefc;color:var(--accent)}
+    .small{font-size:13px;color:var(--muted)}
+    footer.small{margin-top:18px;color:var(--muted)}
+    @media (max-width:640px){.options{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Teste DISC — 30 perguntas situacionais</h1>
+        <p class="lead">Aplicado por: <strong>Grazi</strong></p>
+      </div>
+    </header>
+
+    <form id="discForm" class="card" autocomplete="off">
+      <div style="margin-bottom:12px">
+        <label>Nome completo (participante):<br/>
+          <input type="text" id="participantName" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd" />
+        </label>
+      </div>
+
+      <div id="questions"></div>
+
+      <div class="controls">
+        <button type="button" id="submitBtn">Enviar</button>
+        <button type="button" id="resetBtn" class="secondary">Limpar respostas</button>
+        <div style="margin-left:auto" class="small">Progresso: <span id="progress">0/30</span></div>
+      </div>
+
+      <div id="thanks" class="card" style="display:none;margin-top:12px">
+        <strong>✅ Obrigado por participar do teste!</strong>
+        <p class="small">Seus dados foram enviados para análise.</p>
+      </div>
+    </form>
+
+    <footer class="small">Formato: 30 questões — análise por DISC e temperamento clássico (só a aplicadora tem acesso aos resultados).</footer>
+  </div>
+
+<script>
+/* --- CONFIG: coloque aqui sua URL do Apps Script Web App e a chave secreta (iguais ao Apps Script) --- */
+const WEBAPP_URL = 'YOUR_WEBAPP_URL'; // ex.: https://script.google.com/macros/s/AKfycb.../exec
+const SECRET_KEY = 'YOUR_SECRET_KEY';  // ex.: 'minhaChaveSecreta123'
+/* ------------------------------------------------------------------------------------------- */
+
+/* --- perguntas (idênticas às que definimos) --- */
+const questions = [
+  {q: "Quando surge um problema crítico com prazo curto, você tende a:", a:"Assumir a liderança e tomar decisões rápidas.", b:"Reunir rapidamente a equipe para alinhar ações.", c:"Manter a calma e seguir um plano estável.", d:"Examinar os dados e identificar a causa antes de agir." , m:['D','I','S','C']},
+  {q: "Em reuniões, você costuma:", a:"Direcionar a conversa para resultados.", b:"Anfitriar e motivar as pessoas.", c:"Ouvir mais e evitar conflitos.", d:"Focar nos detalhes e na precisão das informações.", m:['D','I','S','C']},
+  {q: "Quando recebe feedback crítico, você normalmente:", a:"Age para corrigir e melhorar o desempenho.", b:"Procura entender o lado emocional e manter o relacionamento.", c:"Aceita e integra sem grandes mudanças de estilo.", d:"Analisa o feedback e confere a validade das observações.", m:['D','I','S','C']},
+  {q: "Se precisa delegar uma tarefa importante, você:", a:"Confia responsabilidades para quem entrega resultados.", b:"Escolhe alguém que comunique bem com a equipe.", c:"Prefere delegar a quem já é estável e confiável.", d:"Designa quem segue procedimentos e padrões." , m:['D','I','S','C']},
+  {q: "Ao iniciar um projeto novo, você prefere:", a:"Traçar metas ambiciosas e assumir riscos.", b:"Construir entusiasmo e apoio do grupo.", c:"Estabelecer rotinas seguras e previsíveis.", d:"Criar processos detalhados e cronogramas." , m:['D','I','S','C']},
+  {q: "Quando alguém propõe uma ideia diferente, você:", a:"Testa rapidamente essa ideia na prática.", b:"Explora como a ideia pode engajar as pessoas.", c:"Avalia se a ideia preserva o equilíbrio do time.", d:"Verifica se a proposta atende normas e critérios técnicos." , m:['D','I','S','C']},
+  {q: "Se houver conflito entre colegas, você normalmente:", a:"Intervém para resolver e manter produtividade.", b:"Busca conciliação e entendimento emocional.", c:"Age para restaurar harmonia e estabilidade.", d:"Sugere regras ou políticas para evitar repetição." , m:['D','I','S','C']},
+  {q: "Sua prioridade quando lidera uma equipe é:", a:"Resultados e metas claras.", b:"Clima motivador e envolvimento.", c:"Segurança e previsibilidade para todos.", d:"Qualidade e conformidade com padrões." , m:['D','I','S','C']},
+  {q: "Diante de incerteza, você costuma:", a:"Tomar uma decisão corajosa e seguir em frente.", b:"Procurar apoio e opiniões diversas.", c:"Preferir esperar por sinais mais claros.", d:"Coletar mais evidências antes de agir." , m:['D','I','S','C']},
+  {q: "Ao explicar uma nova tarefa, você:", a:"Foca no objetivo final e no impacto.", b:"Usa exemplos e histórias para engajar.", c:"Garante que todos sintam segurança para perguntar.", d:"Fornece instruções detalhadas e critérios de aceitação." , m:['D','I','S','C']},
+  {q: "Quando está sob pressão, sua reação é:", a:"Acelerar e assumir mais controle.", b:"Manter o bom humor para aliviar tensão.", c:"Preservar a rotina e não precipitar mudanças.", d:"Inspecionar os passos e reduzir erros potenciais." , m:['D','I','S','C']},
+  {q: "Se precisa convencer alguém a seguir sua ideia, você:", a:"Apresenta resultados esperados e benefícios claros.", b:"Conecta emocionalmente e cria rapport.", c:"Mostra como a mudança será tranquila para todos.", d:"Mostra evidências e referencias técnicas." , m:['D','I','S','C']},
+  {q: "Ao contratar alguém, você dá mais peso a:", a:"Capacidade de resolver problemas e tomar iniciativa.", b:"Habilidade de comunicação e energia social.", c:"Capacidade de se integrar e ser confiável.", d:"Atenção a competências técnicas e exatidão." , m:['D','I','S','C']},
+  {q: "Num projeto com muitas variáveis, você:", a:"Define prioridades e corta o que não agrega.", b:"Mobiliza a equipe para gerar soluções criativas.", c:"Ajusta o ritmo e mantém coesão do grupo.", d:"Monta um checklist para gerenciar riscos." , m:['D','I','S','C']},
+  {q: "Ao lidar com clientes exigentes, você:", a:"Resolve rápido e mantém o foco no resultado.", b:"Cria conexão e conquista pela simpatia.", c:"Garante consistência no atendimento.", d:"Segue procedimentos para atender exigências." , m:['D','I','S','C']},
+  {q: "Quando aprende algo novo, você prefere:", a:"Aprender fazendo e testando imediatamente.", b:"Aprender em grupo, trocando impressões.", c:"Ter tempo para absorver e praticar devagar.", d:"Estudar material estruturado e referências confiáveis." , m:['D','I','S','C']},
+  {q: "Se precisa melhorar a eficiência do time, você:", a:"Reorganiza papéis e metas para mais foco.", b:"Incentiva colaboração e celebrações pequenas.", c:"Apoia mudanças graduais para não perturbar o grupo.", d:"Padroniza processos e reduz variação." , m:['D','I','S','C']},
+  {q: "Quando um colega erra publicamente, você tende a:", a:"Corrigir rapidamente e seguir em frente.", b:"Apoiar para recuperar confiança socialmente.", c:"Defender a pessoa e minimizar exposição.", d:"Apontar o erro para que seja evitado no futuro." , m:['D','I','S','C']},
+  {q: "Seu estilo de comunicação é mais:", a:"Direto e orientado à ação.", b:"Expressivo e persuasivo.", c:"Calmo e compreensivo.", d:"Preciso e técnico." , m:['D','I','S','C']},
+  {q: "Num ambiente com muitas mudanças, você:", a:"Vê oportunidades e lidera a transição.", b:"Tenta manter a energia positiva do grupo.", c:"Procura garantir que ninguém seja prejudicado.", d:"Documenta e cria regras para a nova realidade." , m:['D','I','S','C']},
+  {q: "Quando avalia uma proposta, você dá mais importância a:", a:"Potencial de impacto e velocidade.", b:"Como a proposta será recebida pelas pessoas.", c:"Se traz estabilidade e segurança a longo prazo.", d:"Se atende critérios técnicos e de conformidade." , m:['D','I','S','C']},
+  {q: "Se tivesse que escolher entre velocidade e precisão, você:", a:"Escolheria velocidade para ganhar vantagem.", b:"Preferiria equilíbrio mantendo o moral alto.", c:"Optaria por previsibilidade e menor risco.", d:"Daria prioridade à precisão e qualidade." , m:['D','I','S','C']},
+  {q: "Quando trabalha em equipe, seu maior valor é:", a:"Conseguir resultados rapidamente.", b:"Inspirar e aproximar pessoas.", c:"Criar ambiente confiável e colaborativo.", d:"Assegurar que o trabalho esteja correto e bem feito." , m:['D','I','S','C']},
+  {q: "Se precisa apresentar uma ideia para superiores, você:", a:"Vai direto ao ponto com números e metas.", b:"Encanta com narrativa e carisma.", c:"Menciona como a ideia protege interesses do time.", d:"Apresenta dados, evidências e planos detalhados." , m:['D','I','S','C']},
+  {q: "Diante de críticas injustas, sua reação mais provável é:", a:"Responder com fatos e retomar controle.", b:"Tentar manter relações e acalmar a situação.", c:"Evitar confronto e diminuir impacto.", d:"Colecionar provas e refutar tecnicamente." , m:['D','I','S','C']},
+  {q: "Quando um projeto falha por fatores previsíveis, você:", a:"Cobra ações rápidas de correção.", b:"Cuida do moral da equipe afetada.", c:"Revisa rotinas para evitar nova queda de ritmo.", d:"Investiga processos para sanar falhas técnicas." , m:['D','I','S','C']},
+  {q: "Se pudesse escolher um papel ideal, seria:", a:"Líder que impulsiona resultados.", b:"Conector social que mobiliza pessoas.", c:"Âncora que mantém estabilidade no time.", d:"Especialista que garante qualidade e padrão." , m:['D','I','S','C']},
+  {q: "Ao delegar, você dá mais liberdade quando:", a:"Vê que a pessoa pode atingir metas sozinha.", b:"Confia que ela se comunica bem com outros.", c:"Sabe que a pessoa vai manter a rotina.", d:"Tem certeza de que seguirá procedimentos." , m:['D','I','S','C']},
+  {q: "Num prazo apertado, você contribui mais com:", a:"Tomada de decisões rápidas.", b:"Manter a equipe motivada e alinhada.", c:"Preservar ritmo e reduzir estresse.", d:"Garantir que os entregáveis cumpram padrões." , m:['D','I','S','C']},
+  {q: "Você prefere feedback que seja:", a:"Objetivo e orientado a melhorias.", b:"Positivo e encorajador.", c:"Suave e construtivo.", d:"Detalhado e específico." , m:['D','I','S','C']}
+];
+
+const qContainer = document.getElementById('questions');
+questions.forEach((item, idx) => {
+  const div = document.createElement('div');
+  div.className = 'q';
+  div.innerHTML = `
+    <p><strong>${idx+1}.</strong> ${item.q}</p>
+    <div class="options">
+      <label class="opt"><input type="radio" name="q${idx+1}" value="${item.m[0]}"/> A) ${escapeHtml(item.a)}</label>
+      <label class="opt"><input type="radio" name="q${idx+1}" value="${item.m[1]}"/> B) ${escapeHtml(item.b)}</label>
+      <label class="opt"><input type="radio" name="q${idx+1}" value="${item.m[2]}"/> C) ${escapeHtml(item.c)}</label>
+      <label class="opt"><input type="radio" name="q${idx+1}" value="${item.m[3]}"/> D) ${escapeHtml(item.d)}</label>
+    </div>
+  `;
+  qContainer.appendChild(div);
+});
+
+const inputs = document.querySelectorAll('input[type=radio]');
+inputs.forEach(i => i.addEventListener('change', updateProgress));
+function updateProgress(){
+  const answered = new Set();
+  for(let i=1;i<=questions.length;i++){
+    const v = document.querySelector(`input[name=q${i}]:checked`);
+    if(v) answered.add(i);
+  }
+  document.getElementById('progress').innerText = `${answered.size}/${questions.length}`;
+}
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{ document.getElementById('discForm').reset(); updateProgress(); document.getElementById('thanks').style.display='none'; });
+
+document.getElementById('submitBtn').addEventListener('click', async ()=> {
+  // validação
+  const name = document.getElementById('participantName').value.trim();
+  if(!name){ alert('Por favor insira o nome completo do participante.'); return; }
+  // checar se todas respondidas
+  for(let i=1;i<=questions.length;i++){
+    if(!document.querySelector(`input[name=q${i}]:checked`)){ alert('Por favor responda todas as perguntas. Falta a pergunta '+i+'.'); return; }
+  }
+
+  // contagem
+  const counts = {D:0,I:0,S:0,C:0};
+  const answers = [];
+  for(let i=1;i<=questions.length;i++){
+    const sel = document.querySelector(`input[name=q${i}]:checked`).value;
+    answers.push(sel);
+    counts[sel] = (counts[sel]||0) + 1;
+  }
+
+  // ordena perfis
+  const order = Object.entries(counts).sort((a,b)=> b[1]-a[1]);
+  const dominant = order[0][0];
+  const second = order[1][0];
+
+  // calcula temperamento (mapa simplificado)
+  const temp = temperamentMap(dominant, second);
+
+  // monta payload (inclui secret)
+  const payload = {
+    secret: SECRET_KEY,
+    name: name,
+    timestamp: new Date().toISOString(),
+    counts: counts,
+    dominant: dominant,
+    secondary: second,
+    temperament: temp,
+    answers: answers
+  };
+
+  // envia ao Web App
+  try {
+    const res = await fetch(WEBAPP_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('Erro ao enviar (status '+res.status+')');
+    // mostra apenas agradecimento
+    document.getElementById('discForm').reset();
+    updateProgress();
+    document.getElementById('thanks').style.display='block';
+    window.scrollTo(0,0);
+  } catch(err){
+    console.error(err);
+    alert('Ocorreu um erro ao enviar. Verifique a conexão ou a configuração do Web App.');
+  }
+});
+
+function temperamentMap(d, s){
+  // mapeamento DISC -> temperamentos
+  const mapSingle = {D:'Colérico', I:'Sanguíneo', S:'Fleumático', C:'Melancólico'};
+  // combinações (ordem indiferente)
+  const key = [d,s].sort().join('');
+  const combos = {
+    'CD': 'Colérico-Melancólico',
+    'CI': 'Melancólico-Sanguíneo',
+    'CS': 'Melancólico-Fleumático',
+    'DI': 'Colérico-Sanguíneo',
+    'DS': 'Colérico-Fleumático',
+    'IS': 'Sanguíneo-Fleumático'
+  };
+  // try combos by sorted pair; fallback: dominant single
+  if(combos[key]) return combos[key];
+  return mapSingle[d] || '';
+}
+
+function escapeHtml(text){ return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
