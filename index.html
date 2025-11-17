@@ -3,116 +3,375 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Teste Situacional — 30 perguntas</title>
+  <title>Teste DISC + Temperamentos</title>
   <style>
-    :root{--bg:#f6f8fb;--card:#fff;--accent:#2b6cb0;--muted:#6b7280}
-    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);margin:0;padding:24px;color:#111}
-    .container{max-width:980px;margin:0 auto}
+    :root{--bg:#f7f9fc;--card:#ffffff;--accent:#2563eb;--muted:#6b7280}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); margin:0; color:#111}
+    .wrap{max-width:860px;margin:28px auto;padding:20px}
     header{display:flex;align-items:center;gap:16px}
-    h1{margin:0;font-size:20px}
-    p.lead{color:var(--muted);margin:6px 0 18px}
-    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(16,24,40,0.06);margin-bottom:16px}
-    .q{margin-bottom:12px}
-    .q p{margin:0 0 6px;font-weight:600}
-    .options{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-    label.opt{display:block;padding:10px;border-radius:8px;border:1px solid #e6e9ef;cursor:pointer}
-    input[type=radio]{margin-right:8px}
-    .controls{display:flex;gap:8px;align-items:center}
+    h1{font-size:20px;margin:0}
+    p.lead{color:var(--muted);margin:8px 0 20px}
+    .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
+    .question{margin-bottom:18px}
+    .question h2{font-size:18px;margin:0 0 10px}
+    .answers{display:grid;gap:8px}
+    .answer{background:#f1f5f9;border-radius:8px;padding:10px;cursor:pointer;border:1px solid transparent}
+    .answer input{margin-right:10px}
+    .answer:hover{border-color:#e2e8f0}
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
     button{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
     button.secondary{background:#e6eefc;color:var(--accent)}
-    .small{font-size:13px;color:var(--muted)}
-    footer.small{margin-top:18px;color:var(--muted)}
-    @media (max-width:640px){.options{grid-template-columns:1fr}}
+    .progress{height:8px;background:#eef2ff;border-radius:999px;margin-bottom:16px;overflow:hidden}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#7dd3fc);width:0%}
+    .result-title{font-weight:600;font-size:18px;margin:0 0 8px}
+    .result-block{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .badge{display:inline-block;padding:6px 10px;background:#eff6ff;border-radius:999px;font-weight:600}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    @media (max-width:640px){.result-block{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <header>
-      <div>
-        <h1>Teste Situacional — 30 perguntas</h1>
-        <p class="lead">Aplicado por: <strong>Grazi</strong></p>
+      <div class="card" style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="#2563eb" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div>
+          <h1>Teste Comportamental — DISC + Temperamentos</h1>
+          <p class="lead">Responda com sinceridade. São 30 perguntas — leva cerca de 5 minutos.</p>
+        </div>
       </div>
     </header>
 
-    <form id="discForm" class="card" autocomplete="off">
-      <div style="margin-bottom:12px">
-        <label>Nome completo (participante):<br/>
-          <input type="text" id="participantName" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd" />
-        </label>
+    <main class="card" id="card">
+      <div class="progress" aria-hidden><i id="prog"></i></div>
+      <div id="content"></div>
+      <div class="controls" id="controls" style="display:none">
+        <button class="secondary" id="prevBtn">Voltar</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div id="qcount" style="color:var(--muted)"></div>
+          <button id="nextBtn">Próxima</button>
+        </div>
       </div>
+    </main>
 
-      <div id="questions"></div>
-
-      <div class="controls">
-        <button type="button" id="submitBtn">Enviar</button>
-        <button type="button" id="resetBtn" class="secondary">Limpar respostas</button>
-        <div style="margin-left:auto" class="small">Progresso: <span id="progress">0/30</span></div>
-      </div>
-
-      <div id="thanks" class="card" style="display:none;margin-top:12px">
-        <strong>✅ Obrigado por participar do teste!</strong>
-        <p class="small">Seus dados foram enviados para análise.</p>
-      </div>
-    </form>
-
-    <footer class="small">Formato: 30 questões — análise do teste situacional (só a aplicadora tem acesso aos resultados).</footer>
+    <footer>
+      <small>Modelo criado para publicação em GitHub Pages. Você pode personalizar textos e estilos no arquivo <code>index.html</code>.</small>
+    </footer>
   </div>
 
-  <script>
-  /* --- CONFIGURAÇÃO --- */
-  const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzE4IiI2fI5VCEY3nJOo622snscHzQ1h7rD81ZBy99yGFyUCp-5FAXDhaUr2QflPTqjWQ/exec';
-  const SECRET_KEY = 'Grazi123'; // chave secreta
+<script>
+// === Perguntas: 20 DISC + 10 Temperamento (total 30) ===
+const questions = [
+  // DISC (20)
+  {id:'DISC1', text:'Ao receber um novo projeto urgente, você tende a:', answers:[
+    {txt:'Começar imediatamente.', add:{disc_D:1}},
+    {txt:'Engajar a equipe.', add:{disc_I:1}},
+    {txt:'Organizar o passo a passo antes de agir.', add:{disc_S:1}},
+    {txt:'Analisar riscos e detalhes.', add:{disc_C:1}}
+  ]},
+  {id:'DISC2', text:'Em conflitos, você geralmente:', answers:[
+    {txt:'Vai direto ao ponto.', add:{disc_D:1}},
+    {txt:'Busca harmonizar com leveza.', add:{disc_I:1}},
+    {txt:'Ouve todos antes de falar.', add:{disc_S:1}},
+    {txt:'Usa fatos para resolver.', add:{disc_C:1}}
+  ]},
+  {id:'DISC3', text:'Quando enfrenta pressão:', answers:[
+    {txt:'Assume o controle.', add:{disc_D:1}},
+    {txt:'Usa humor para aliviar.', add:{disc_I:1}},
+    {txt:'Mantém calma e constância.', add:{disc_S:1}},
+    {txt:'Se concentra nos detalhes.', add:{disc_C:1}}
+  ]},
+  {id:'DISC4', text:'Para você, tomar decisões é:', answers:[
+    {txt:'Rápido.', add:{disc_D:1}},
+    {txt:'Intuitivo.', add:{disc_I:1}},
+    {txt:'Cauteloso.', add:{disc_S:1}},
+    {txt:'Analítico.', add:{disc_C:1}}
+  ]},
+  {id:'DISC5', text:'Seu estilo de comunicação tende a ser:', answers:[
+    {txt:'Direto.', add:{disc_D:1}},
+    {txt:'Entusiasmado.', add:{disc_I:1}},
+    {txt:'Paciente.', add:{disc_S:1}},
+    {txt:'Objetivo e técnico.', add:{disc_C:1}}
+  ]},
+  {id:'DISC6', text:'Diante de mudanças repentinas, você:', answers:[
+    {txt:'Se adapta e segue.', add:{disc_D:1}},
+    {txt:'Conversa com outros para entender.', add:{disc_I:1}},
+    {txt:'Sente um desconforto inicial.', add:{disc_S:1}},
+    {txt:'Analisa impactos antes de agir.', add:{disc_C:1}}
+  ]},
+  {id:'DISC7', text:'Quando lidera um projeto, você prefere:', answers:[
+    {txt:'Atuar com autonomia.', add:{disc_D:1}},
+    {txt:'Engajar pessoas.', add:{disc_I:1}},
+    {txt:'Criar estabilidade.', add:{disc_S:1}},
+    {txt:'Definir regras claras.', add:{disc_C:1}}
+  ]},
+  {id:'DISC8', text:'Ao iniciar uma tarefa:', answers:[
+    {txt:'Começa logo.', add:{disc_D:1}},
+    {txt:'Avisa e envolve o grupo.', add:{disc_I:1}},
+    {txt:'Faz com calma.', add:{disc_S:1}},
+    {txt:'Lê instruções e padrões.', add:{disc_C:1}}
+  ]},
+  {id:'DISC9', text:'Quando algo não sai como esperado, você:', answers:[
+    {txt:'Assume a responsabilidade.', add:{disc_D:1}},
+    {txt:'Minimiza o impacto com leveza.', add:{disc_I:1}},
+    {txt:'Procura evitar novas falhas.', add:{disc_S:1}},
+    {txt:'Avalia exatamente o que deu errado.', add:{disc_C:1}}
+  ]},
+  {id:'DISC10', text:'Você se sente mais confortável quando:', answers:[
+    {txt:'Tem autonomia.', add:{disc_D:1}},
+    {txt:'Está com pessoas.', add:{disc_I:1}},
+    {txt:'Tudo está previsível.', add:{disc_S:1}},
+    {txt:'Existe estrutura.', add:{disc_C:1}}
+  ]},
+  {id:'DISC11', text:'Quando alguém demora a responder, você:', answers:[
+    {txt:'Cobra.', add:{disc_D:1}},
+    {txt:'Pergunta de forma leve.', add:{disc_I:1}},
+    {txt:'Aguarda.', add:{disc_S:1}},
+    {txt:'Verifica o processo.', add:{disc_C:1}}
+  ]},
+  {id:'DISC12', text:'Em reuniões, você:', answers:[
+    {txt:'Vai direto ao essencial.', add:{disc_D:1}},
+    {txt:'Interage bastante.', add:{disc_I:1}},
+    {txt:'Fala pouco.', add:{disc_S:1}},
+    {txt:'Faz perguntas técnicas.', add:{disc_C:1}}
+  ]},
+  {id:'DISC13', text:'Quando surge um problema inesperado:', answers:[
+    {txt:'Resolve rápido.', add:{disc_D:1}},
+    {txt:'Reúne pessoas para discutir.', add:{disc_I:1}},
+    {txt:'Mantém calma.', add:{disc_S:1}},
+    {txt:'Analisa causas.', add:{disc_C:1}}
+  ]},
+  {id:'DISC14', text:'Você se motiva mais por:', answers:[
+    {txt:'Resultados.', add:{disc_D:1}},
+    {txt:'Reconhecimento.', add:{disc_I:1}},
+    {txt:'Estabilidade.', add:{disc_S:1}},
+    {txt:'Precisão.', add:{disc_C:1}}
+  ]},
+  {id:'DISC15', text:'Seu ritmo de trabalho é:', answers:[
+    {txt:'Intenso.', add:{disc_D:1}},
+    {txt:'Variável e criativo.', add:{disc_I:1}},
+    {txt:'Constante.', add:{disc_S:1}},
+    {txt:'Cauteloso.', add:{disc_C:1}}
+  ]},
+  {id:'DISC16', text:'Você prefere metas:', answers:[
+    {txt:'Desafiadoras.', add:{disc_D:1}},
+    {txt:'Dependentes de pessoas.', add:{disc_I:1}},
+    {txt:'Realistas.', add:{disc_S:1}},
+    {txt:'Claras e detalhadas.', add:{disc_C:1}}
+  ]},
+  {id:'DISC17', text:'Seu maior ponto forte é:', answers:[
+    {txt:'Determinação.', add:{disc_D:1}},
+    {txt:'Comunicação.', add:{disc_I:1}},
+    {txt:'Paciência.', add:{disc_S:1}},
+    {txt:'Organização.', add:{disc_C:1}}
+  ]},
+  {id:'DISC18', text:'Quando recebe instruções vagas:', answers:[
+    {txt:'Age assim mesmo.', add:{disc_D:1}},
+    {txt:'Pergunta aos colegas.', add:{disc_I:1}},
+    {txt:'Busca mais contexto.', add:{disc_S:1}},
+    {txt:'Pede detalhes.', add:{disc_C:1}}
+  ]},
+  {id:'DISC19', text:'Prazos curtos fazem você:', answers:[
+    {txt:'Acelerar.', add:{disc_D:1}},
+    {txt:'Pedir ajuda.', add:{disc_I:1}},
+    {txt:'Cuidar da qualidade.', add:{disc_S:1}},
+    {txt:'Revisar processos.', add:{disc_C:1}}
+  ]},
+  {id:'DISC20', text:'Quando trabalha em equipe, você tende a:', answers:[
+    {txt:'Liderar.', add:{disc_D:1}},
+    {txt:'Energizar.', add:{disc_I:1}},
+    {txt:'Apoiar.', add:{disc_S:1}},
+    {txt:'Organizar.', add:{disc_C:1}}
+  ]},
+  // TEMPERAMENTO (10)
+  {id:'TEMP1', text:'Em situações novas, você:', answers:[
+    {txt:'Assume controle.', add:{temp_Co:1}},
+    {txt:'Se entusiasma.', add:{temp_Sg:1}},
+    {txt:'Observa primeiro.', add:{temp_Fl:1}},
+    {txt:'Analisa profundamente.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP2', text:'Você é mais motivado por:', answers:[
+    {txt:'Desafio.', add:{temp_Co:1}},
+    {txt:'Conexões.', add:{temp_Sg:1}},
+    {txt:'Harmonia.', add:{temp_Fl:1}},
+    {txt:'Significado.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP3', text:'Em conflitos, você:', answers:[
+    {txt:'Enfrenta.', add:{temp_Co:1}},
+    {txt:'Usa leveza.', add:{temp_Sg:1}},
+    {txt:'Evita.', add:{temp_Fl:1}},
+    {txt:'Sofre internamente.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP4', text:'Sobre emoções:', answers:[
+    {txt:'Controla externamente.', add:{temp_Co:1}},
+    {txt:'Expressa com facilidade.', add:{temp_Sg:1}},
+    {txt:'Mantém estáveis.', add:{temp_Fl:1}},
+    {txt:'Sente intensamente.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP5', text:'Quando algo dá errado, você tende a:', answers:[
+    {txt:'Resolver rápido.', add:{temp_Co:1}},
+    {txt:'Minimizar.', add:{temp_Sg:1}},
+    {txt:'Manter a calma.', add:{temp_Fl:1}},
+    {txt:'Refletir demais.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP6', text:'Seu ritmo natural é:', answers:[
+    {txt:'Acelerado.', add:{temp_Co:1}},
+    {txt:'Variado.', add:{temp_Sg:1}},
+    {txt:'Constante.', add:{temp_Fl:1}},
+    {txt:'Profundo.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP7', text:'Você se irrita mais com:', answers:[
+    {txt:'Lerdeza.', add:{temp_Co:1}},
+    {txt:'Rigidez.', add:{temp_Sg:1}},
+    {txt:'Conflitos.', add:{temp_Fl:1}},
+    {txt:'Falta de cuidado.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP8', text:'Você se identifica mais com pessoas que:', answers:[
+    {txt:'São fortes.', add:{temp_Co:1}},
+    {txt:'São divertidas.', add:{temp_Sg:1}},
+    {txt:'São calmas.', add:{temp_Fl:1}},
+    {txt:'São sensíveis.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP9', text:'Seu maior ponto forte emocional é:', answers:[
+    {txt:'Determinação.', add:{temp_Co:1}},
+    {txt:'Entusiasmo.', add:{temp_Sg:1}},
+    {txt:'Equilíbrio.', add:{temp_Fl:1}},
+    {txt:'Profundidade.', add:{temp_M:1}}
+  ]},
+  {id:'TEMP10', text:'Seu maior desafio emocional é:', answers:[
+    {txt:'Impaciência.', add:{temp_Co:1}},
+    {txt:'Distração.', add:{temp_Sg:1}},
+    {txt:'Passividade.', add:{temp_Fl:1}},
+    {txt:'Autocrítica.', add:{temp_M:1}}
+  ]}
+];
 
-  /* --- PERGUNTAS --- */
-  const questions = [
-    {q:"Quando surge um problema crítico com prazo curto, você tende a:",a:"Assumir a liderança e tomar decisões rápidas.",b:"Reunir rapidamente a equipe para alinhar ações.",c:"Manter a calma e seguir um plano estável.",d:"Examinar os dados e identificar a causa antes de agir.",m:['D','I','S','C']},
-    // ... coloque aqui todas as 30 perguntas
-  ];
+// === Textos dos 16 perfis (curtos) ===
+const profileTexts = {
+  'D+Co':{
+    short:'D + Co',
+    facil:'Liderança natural, ação rápida e coragem em decisões. Alto impulso para resultados.',
+    alerta:'Impaciência, comunicação brusca e baixa tolerância a erros.'
+  },
+  'D+Sg':{short:'D + Sg',facil:'Energia alta, persuasão e sociabilidade combinadas com ação.',alerta:'Impulso, dispersão e excesso de confiança.'},
+  'D+Fl':{short:'D + Fl',facil:'Estratégico e consistente, controla emoções sob pressão.',alerta:'Pode parecer distante e relutar em pedir ajuda.'},
+  'D+M':{short:'D + M',facil:'Decisão com análise profunda, foco e disciplina emocional.',alerta:'Autocrítica, rigidez e preocupação excessiva com falhas.'},
 
-  /* --- GERAR FORMULÁRIO --- */
-  const qContainer = document.getElementById('questions');
-  questions.forEach((item, idx)=>{
-    const div = document.createElement('div');
-    div.className='q';
-    div.innerHTML=`
-      <p><strong>${idx+1}.</strong> ${item.q}</p>
-      <div class="options">
-        <label class="opt"><input type="radio" name="q${idx+1}" value="${item.m[0]}"/> A) ${escapeHtml(item.a)}</label>
-        <label class="opt"><input type="radio" name="q${idx+1}" value="${item.m[1]}"/> B) ${escapeHtml(item.b)}</label>
-        <label class="opt"><input type="radio" name="q${idx+1}" value="${item.m[2]}"/> C) ${escapeHtml(item.c)}</label>
-        <label class="opt"><input type="radio" name="q${idx+1}" value="${item.m[3]}"/> D) ${escapeHtml(item.d)}</label>
-      </div>
-    `;
-    qContainer.appendChild(div);
+  'I+Co':{short:'I + Co',facil:'Comunicação cativante e capacidade de inspirar ação.',alerta:'Pode ser intenso demais, falar antes de pensar.'},
+  'I+Sg':{short:'I + Sg',facil:'Sociabilidade, criatividade e facilidade em engajar.',alerta:'Perda de foco e dificuldade com rotinas.'},
+  'I+Fl':{short:'I + Fl',facil:'Empatia e comunicação suave que gera ambiente leve.',alerta:'Tende a ceder demais e evitar confrontos.'},
+  'I+M':{short:'I + M',facil:'Sensibilidade artística e comunicação profunda.',alerta:'Oscilações emocionais e sensibilidade a críticas.'},
+
+  'S+Co':{short:'S + Co',facil:'Lealdade com firmeza, constância e determinação silenciosa.',alerta:'Teimosia e resistência a mudanças.'},
+  'S+Sg':{short:'S + Sg',facil:'Relacionamento caloroso e cooperação estável.',alerta:'Dificuldade em impor limites e indecisão.'},
+  'S+Fl':{short:'S + Fl',facil:'Calma, harmonia e confiabilidade absoluta.',alerta:'Aversão a mudanças e passividade.'},
+  'S+M':{short:'S + M',facil:'Sensibilidade e cuidado genuíno com o outro.',alerta:'Tende a carregar preocupações e demora a se posicionar.'},
+
+  'C+Co':{short:'C + Co',facil:'Precisão com firmeza e análise rápida.',alerta:'Pode ser inflexível e crítico demais.'},
+  'C+Sg':{short:'C + Sg',facil:'Comunicação clara e criatividade estruturada.',alerta:'Oscila entre foco e dispersão, ansiedade com prazos.'},
+  'C+Fl':{short:'C + Fl',facil:'Consistência, organização e equilíbrio emocional.',alerta:'Rigidez com mudanças e medo de errar.'},
+  'C+M':{short:'C + M',facil:'Profundidade analítica e alta qualidade técnica.',alerta:'Autocobrança extrema e lentidão por revisão.'}
+};
+
+// === Estado ===
+let state = {
+  idx:0,
+  scores: {disc_D:0,disc_I:0,disc_S:0,disc_C:0,temp_Co:0,temp_Sg:0,temp_Fl:0,temp_M:0}
+};
+
+// === Render ===
+const content = document.getElementById('content');
+const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn');
+const controls = document.getElementById('controls');
+const prog = document.getElementById('prog');
+const qcount = document.getElementById('qcount');
+
+function renderQuestion(){
+  const q = questions[state.idx];
+  const total = questions.length;
+  prog.style.width = Math.round((state.idx/total)*100) + '%';
+  qcount.textContent = `${state.idx+1} / ${total}`;
+  controls.style.display = 'flex';
+
+  let html = `<div class="question"><h2>${q.text}</h2><div class="answers">`;
+  q.answers.forEach((a,i)=>{
+    html += `<label class="answer"><input type="radio" name="ans" value="${i}"> ${a.txt}</label>`;
   });
+  html += `</div></div>`;
+  content.innerHTML = html;
+  nextBtn.textContent = (state.idx === questions.length-1) ? 'Finalizar' : 'Próxima';
+}
 
-  /* --- PROGRESSO --- */
-  const inputs=document.querySelectorAll('input[type=radio]');
-  inputs.forEach(i=>i.addEventListener('change',updateProgress));
-  function updateProgress(){
-    const answered=new Set();
-    for(let i=1;i<=questions.length;i++){
-      const v=document.querySelector(`input[name=q${i}]:checked`);
-      if(v) answered.add(i);
-    }
-    document.getElementById('progress').innerText=`${answered.size}/${questions.length}`;
+function applyAnswer(){
+  const q = questions[state.idx];
+  const input = document.querySelector('input[name="ans"]:checked');
+  if(!input) return false;
+  const choice = q.answers[parseInt(input.value)];
+  // aplicar somas
+  Object.keys(choice.add).forEach(k=>{ state.scores[k] = (state.scores[k]||0) + choice.add[k]; });
+  return true;
+}
+
+nextBtn.addEventListener('click',()=>{
+  if(!applyAnswer()){
+    alert('Por favor, selecione uma alternativa.');
+    return;
   }
+  if(state.idx < questions.length-1){ state.idx++; renderQuestion(); }
+  else { showResult(); }
+});
+prevBtn.addEventListener('click',()=>{
+  if(state.idx>0){ state.idx--; renderQuestion(); }
+});
 
-  /* --- RESET --- */
-  document.getElementById('resetBtn').addEventListener('click',()=>{
-    document.getElementById('discForm').reset();
-    updateProgress();
-    document.getElementById('thanks').style.display='none';
-  });
+function showResult(){
+  // progress to 100
+  prog.style.width = '100%';
+  controls.style.display = 'none';
 
-  /* --- ENVIO PARA PLANILHA --- */
-  document.getElementById('submitBtn').addEventListener('click', async () => {
-    const name = document.getElementById('participantName').value.trim();
-    if(!name){alert('Por favor insira o nome completo do participante.');return;}
-    const answers=[];
-    const counts={D:0,I:0,S:0,C:0};
-    for(let i=1;i<=questions.length;i++){
-      const sel=document.querySelector(`input[name=q${i}]:checked`);
-      if(!sel){alert('Por favor responda todas as perguntas. Falta a pergunta '+i+'.');return;}
-      answers.push(sel.value);
-      co
+  const s = state.scores;
+  // DISC tie-break order D>I>S>C
+  const discOrder = ['disc_D','disc_I','disc_S','disc_C'];
+  let discWinner = discOrder[0];
+  for(const k of discOrder){ if(s[k] > s[discWinner]) discWinner = k; }
+  const mappingDisc = {disc_D:'D',disc_I:'I',disc_S:'S',disc_C:'C'};
+  const discLetter = mappingDisc[discWinner];
+
+  // TEMP tie-break Co > Sg > Fl > M
+  const tempOrder = ['temp_Co','temp_Sg','temp_Fl','temp_M'];
+  let tempWinner = tempOrder[0];
+  for(const k of tempOrder){ if(s[k] > s[tempWinner]) tempWinner = k; }
+  const mappingTemp = {temp_Co:'Co',temp_Sg:'Sg',temp_Fl:'Fl',temp_M:'M'};
+  const tempShort = mappingTemp[tempWinner];
+
+  const key = discLetter + '+' + tempShort;
+  const profile = profileTexts[key] || {short:`${discLetter} + ${tempShort}`, facil:'—', alerta:'—'};
+
+  content.innerHTML = `
+    <div style="text-align:center">
+      <div class="badge">Seu perfil: <strong>${profile.short}</strong></div>
+      <h3 class="result-title">${profile.short}</h3>
+      <div class="result-block">
+        <div>
+          <strong>Facilidades</strong>
+          <p style="margin:8px 0 0">${profile.facil}</p>
+        </div>
+        <div>
+          <strong>Pontos de alerta</strong>
+          <p style="margin:8px 0 0">${profile.alerta}</p>
+        </div>
+      </div>
+      <div style="margin-top:14px;color:var(--muted);font-size:13px">Pontuação DISC: D:${s.disc_D} I:${s.disc_I} S:${s.disc_S} C:${s.disc_C} · Temperamento: Co:${s.temp_Co} Sg:${s.temp_Sg} Fl:${s.temp_Fl} M:${s.temp_M}</div>
+      <div style="margin-top:12px"><button id="restart">Refazer teste</button></div>
+    </div>
+  `;
+
+  document.getElementById('restart').addEventListener('click',()=>{ location.reload(); });
+}
+
+// inicializa
+renderQuestion();
+</script>
+</body>
+</html>
